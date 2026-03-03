@@ -1,1 +1,231 @@
-# Phyton-Individual-2-SEM
+# Tratamento e Consolidação de Dados - Comex Stat (2023 a 2026)
+
+## 📌 Sobre o Projeto
+Este repositório contém os scripts desenvolvidos em Python, executados no ambiente Google Colab, para o processo de Extração, Transformação e Carga (ETL) dos dados abertos de comércio exterior brasileiro disponibilizados pelo portal Comex Stat. 
+
+O objetivo principal desta aplicação é tratar as bases de dados brutas de Importação e Exportação, realizando o cruzamento (*merge*) com tabelas auxiliares para enriquecer as informações numéricas com suas respectivas descrições em texto. Os dados processados são exportados em formato `.csv`, estruturados para consumo em plataformas de visualização de dados e *Business Intelligence* (BI), como o Power BI.
+
+**Nota Acadêmica:** Este projeto é referente a uma atividade desenvolvida para a FATEC. Trata-se da atualização e reaproveitamento de um código estruturado no semestre anterior (que contemplava os anos de 2023, 2024 e 2025), agora expandido e validado para incluir o processamento dos dados consolidados do ano de **2026**.
+
+## ⚙️ Estrutura do Projeto
+O tratamento de dados foi segmentado em duas frentes de análise distintas, visando atender a diferentes níveis de granularidade:
+
+1. **Análise Municipal:** Detalhamento em nível municipal, cruzando dados de produtos, estados e municípios.
+2. **Análise Nacional (Geral):** Visão macroscópica do Brasil, agregando dados por vias de transporte, unidades da Receita Federal e países de origem/destino.
+
+Abaixo estão os scripts correspondentes a cada uma das abordagens.
+
+---
+
+### 1. Script de Tratamento por Municípios
+Este script processa os arquivos contendo o sufixo `_MUN`, relacionando-os com as tabelas de Códigos SH4, Países e Unidades Federativas/Municípios.
+
+```python
+import pandas as pd
+from google.colab import drive
+
+# Montagem do diretório do Google Drive
+drive.mount('/content/drive')
+origem = '/content/drive/My Drive/Data/Comexstat/'
+
+# --- MAPEAMENTO DOS ARQUIVOS DE ORIGEM ---
+arquivo_1 = origem + 'EXP_2023_MUN.csv'
+arquivo_2 = origem + 'EXP_2024_MUN.csv'
+arquivo_3 = origem + 'EXP_2025_MUN.csv'
+arquivo_7 = origem + 'EXP_2026_MUN.csv'
+
+arquivo_4 = origem + 'IMP_2023_MUN.csv'
+arquivo_5 = origem + 'IMP_2024_MUN.csv'
+arquivo_6 = origem + 'IMP_2025_MUN.csv'
+arquivo_8 = origem + 'IMP_2026_MUN.csv'
+
+sh = origem + 'NCM_SH.csv'
+pais = origem + 'PAIS.csv'
+uf_mun = origem + 'UF_MUN.csv'
+
+# --- LEITURA DAS BASES DE DADOS ---
+exp23 = pd.read_csv(arquivo_1, low_memory=False, sep=';', encoding='UTF-8')
+exp24 = pd.read_csv(arquivo_2, low_memory=False, sep=';', encoding='UTF-8')
+exp25 = pd.read_csv(arquivo_3, low_memory=False, sep=';', encoding='UTF-8')
+exp26 = pd.read_csv(arquivo_7, low_memory=False, sep=';', encoding='UTF-8')
+
+imp23 = pd.read_csv(arquivo_4, low_memory=False, sep=';', encoding='UTF-8')
+imp24 = pd.read_csv(arquivo_5, low_memory=False, sep=';', encoding='UTF-8')
+imp25 = pd.read_csv(arquivo_6, low_memory=False, sep=';', encoding='UTF-8')
+imp26 = pd.read_csv(arquivo_8, low_memory=False, sep=';', encoding='UTF-8')
+
+exeufmun = pd.read_csv(uf_mun, low_memory=False, sep=';', encoding='latin1')
+exesh = pd.read_csv(sh, low_memory=False, sep=';', encoding='latin1')
+exepais = pd.read_csv(pais, low_memory=False, sep=';', encoding='latin1')
+
+# --- TRATAMENTO DAS TABELAS AUXILIARES ---
+exepais = exepais[['CO_PAIS','NO_PAIS']].drop_duplicates(subset='CO_PAIS')
+exeufmun = exeufmun[['CO_MUN_GEO','NO_MUN_MIN']].drop_duplicates(subset='CO_MUN_GEO')
+exesh = exesh[['CO_SH4','NO_SH4_POR']].drop_duplicates(subset='CO_SH4')
+
+# --- CONSOLIDAÇÃO INICIAL ---
+exp23final = pd.concat([exp23], ignore_index=True)
+exp24final = pd.concat([exp24], ignore_index=True)
+exp25final = pd.concat([exp25], ignore_index=True)
+exp26final = pd.concat([exp26], ignore_index=True)
+
+imp23final = pd.concat([imp23], ignore_index=True)
+imp24final = pd.concat([imp24], ignore_index=True)
+imp25final = pd.concat([imp25], ignore_index=True)
+imp26final = pd.concat([imp26], ignore_index=True)
+
+# --- CRUZAMENTO DE DADOS (MERGES) - EXPORTAÇÃO ---
+exp23final = exp23.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+exp23final = exp23final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+exp23final = exp23final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+exp24final = exp24.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+exp24final = exp24final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+exp24final = exp24final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+exp25final = exp25.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+exp25final = exp25final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+exp25final = exp25final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+exp26final = exp26.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+exp26final = exp26final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+exp26final = exp26final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+# --- CRUZAMENTO DE DADOS (MERGES) - IMPORTAÇÃO ---
+imp23final = imp23.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+imp23final = imp23final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+imp23final = imp23final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+imp24final = imp24.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+imp24final = imp24final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+imp24final = imp24final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+imp25final = imp25.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+imp25final = imp25final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+imp25final = imp25final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+imp26final = imp26.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+imp26final = imp26final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+imp26final = imp26final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+# --- EXPORTAÇÃO DOS ARQUIVOS FINAIS (.CSV) ---
+imp23final.to_csv(origem + 'imp23finalmun.csv', index=False)
+imp24final.to_csv(origem + 'imp24finalmun.csv', index=False)
+imp25final.to_csv(origem + 'imp25finalmun.csv', index=False)
+imp26final.to_csv(origem + 'imp26finalmun.csv', index=False)
+
+# Tratamento e Consolidação de Dados - Comex Stat (2023 a 2026)
+
+## 📌 Sobre o Projeto
+Este repositório contém os scripts desenvolvidos em Python, executados no ambiente Google Colab, para o processo de Extração, Transformação e Carga (ETL) dos dados abertos de comércio exterior brasileiro disponibilizados pelo portal Comex Stat. 
+
+O objetivo principal desta aplicação é tratar as bases de dados brutas de Importação e Exportação, realizando o cruzamento (*merge*) com tabelas auxiliares para enriquecer as informações numéricas com suas respectivas descrições em texto. Os dados processados são exportados em formato `.csv`, estruturados para consumo em plataformas de visualização de dados e *Business Intelligence* (BI), como o Power BI.
+
+**Nota Acadêmica:** Este projeto é referente a uma atividade desenvolvida para a FATEC. Trata-se da atualização e reaproveitamento de um código estruturado no semestre anterior (que contemplava os anos de 2023, 2024 e 2025), agora expandido e validado para incluir o processamento dos dados consolidados do ano de **2026**.
+
+## ⚙️ Estrutura do Projeto
+O tratamento de dados foi segmentado em duas frentes de análise distintas, visando atender a diferentes níveis de granularidade:
+
+1. **Análise Municipal:** Detalhamento em nível municipal, cruzando dados de produtos, estados e municípios.
+2. **Análise Nacional (Geral):** Visão macroscópica do Brasil, agregando dados por vias de transporte, unidades da Receita Federal e países de origem/destino.
+
+Abaixo estão os scripts correspondentes a cada uma das abordagens.
+
+---
+
+### 1. Script de Tratamento por Municípios
+Este script processa os arquivos contendo o sufixo `_MUN`, relacionando-os com as tabelas de Códigos SH4, Países e Unidades Federativas/Municípios.
+
+```python
+import pandas as pd
+from google.colab import drive
+
+# Montagem do diretório do Google Drive
+drive.mount('/content/drive')
+origem = '/content/drive/My Drive/Data/Comexstat/'
+
+# --- MAPEAMENTO DOS ARQUIVOS DE ORIGEM ---
+arquivo_1 = origem + 'EXP_2023_MUN.csv'
+arquivo_2 = origem + 'EXP_2024_MUN.csv'
+arquivo_3 = origem + 'EXP_2025_MUN.csv'
+arquivo_7 = origem + 'EXP_2026_MUN.csv'
+
+arquivo_4 = origem + 'IMP_2023_MUN.csv'
+arquivo_5 = origem + 'IMP_2024_MUN.csv'
+arquivo_6 = origem + 'IMP_2025_MUN.csv'
+arquivo_8 = origem + 'IMP_2026_MUN.csv'
+
+sh = origem + 'NCM_SH.csv'
+pais = origem + 'PAIS.csv'
+uf_mun = origem + 'UF_MUN.csv'
+
+# --- LEITURA DAS BASES DE DADOS ---
+exp23 = pd.read_csv(arquivo_1, low_memory=False, sep=';', encoding='UTF-8')
+exp24 = pd.read_csv(arquivo_2, low_memory=False, sep=';', encoding='UTF-8')
+exp25 = pd.read_csv(arquivo_3, low_memory=False, sep=';', encoding='UTF-8')
+exp26 = pd.read_csv(arquivo_7, low_memory=False, sep=';', encoding='UTF-8')
+
+imp23 = pd.read_csv(arquivo_4, low_memory=False, sep=';', encoding='UTF-8')
+imp24 = pd.read_csv(arquivo_5, low_memory=False, sep=';', encoding='UTF-8')
+imp25 = pd.read_csv(arquivo_6, low_memory=False, sep=';', encoding='UTF-8')
+imp26 = pd.read_csv(arquivo_8, low_memory=False, sep=';', encoding='UTF-8')
+
+exeufmun = pd.read_csv(uf_mun, low_memory=False, sep=';', encoding='latin1')
+exesh = pd.read_csv(sh, low_memory=False, sep=';', encoding='latin1')
+exepais = pd.read_csv(pais, low_memory=False, sep=';', encoding='latin1')
+
+# --- TRATAMENTO DAS TABELAS AUXILIARES ---
+exepais = exepais[['CO_PAIS','NO_PAIS']].drop_duplicates(subset='CO_PAIS')
+exeufmun = exeufmun[['CO_MUN_GEO','NO_MUN_MIN']].drop_duplicates(subset='CO_MUN_GEO')
+exesh = exesh[['CO_SH4','NO_SH4_POR']].drop_duplicates(subset='CO_SH4')
+
+# --- CONSOLIDAÇÃO INICIAL ---
+exp23final = pd.concat([exp23], ignore_index=True)
+exp24final = pd.concat([exp24], ignore_index=True)
+exp25final = pd.concat([exp25], ignore_index=True)
+exp26final = pd.concat([exp26], ignore_index=True)
+
+imp23final = pd.concat([imp23], ignore_index=True)
+imp24final = pd.concat([imp24], ignore_index=True)
+imp25final = pd.concat([imp25], ignore_index=True)
+imp26final = pd.concat([imp26], ignore_index=True)
+
+# --- CRUZAMENTO DE DADOS (MERGES) - EXPORTAÇÃO ---
+exp23final = exp23.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+exp23final = exp23final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+exp23final = exp23final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+exp24final = exp24.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+exp24final = exp24final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+exp24final = exp24final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+exp25final = exp25.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+exp25final = exp25final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+exp25final = exp25final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+exp26final = exp26.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+exp26final = exp26final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+exp26final = exp26final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+# --- CRUZAMENTO DE DADOS (MERGES) - IMPORTAÇÃO ---
+imp23final = imp23.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+imp23final = imp23final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+imp23final = imp23final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+imp24final = imp24.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+imp24final = imp24final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+imp24final = imp24final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+imp25final = imp25.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+imp25final = imp25final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+imp25final = imp25final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+imp26final = imp26.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left')
+imp26final = imp26final.merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left')
+imp26final = imp26final.merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+# --- EXPORTAÇÃO DOS ARQUIVOS FINAIS (.CSV) ---
+imp23final.to_csv(origem + 'imp23finalmun.csv', index=False)
+imp24final.to_csv(origem + 'imp24finalmun.csv', index=False)
+imp25final.to_csv(origem + 'imp25finalmun.csv', index=False)
+imp26final.to_csv(origem + 'imp26finalmun.csv', index=False)
