@@ -370,3 +370,101 @@ imp24 = pd.read_csv(arquivo_5, low_memory=False, sep=';', encoding='UTF-8')
 imp25 = pd.read_csv(arquivo_6, low_memory=False, sep=';', encoding='UTF-8')
 imp26 = pd.read_csv(arquivo_8, low_memory=False, sep=';', encoding='UTF
 
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from google.colab import drive
+
+# --- CONECTANDO NO DRIVE ---
+drive.mount('/content/drive', force_remount=True)
+origem = '/content/drive/My Drive/Data/Comexstat/'
+
+# --- MAPEAMENTO DOS ARQUIVOS (MUNICÍPIOS) ---
+arquivo_1 = origem + 'EXP_2023_MUN.csv'
+arquivo_2 = origem + 'EXP_2024_MUN.csv'
+arquivo_3 = origem + 'EXP_2025_MUN.csv'
+arquivo_7 = origem + 'EXP_2026_MUN.csv' 
+
+arquivo_4 = origem + 'IMP_2023_MUN.csv'
+arquivo_5 = origem + 'IMP_2024_MUN.csv'
+arquivo_6 = origem + 'IMP_2025_MUN.csv'
+arquivo_8 = origem + 'IMP_2026_MUN.csv' 
+
+sh = origem + 'NCM_SH.csv'
+pais = origem + 'PAIS.csv'
+uf_mun = origem + 'UF_MUN.csv'
+
+# --- LEITURA DAS BASES ---
+exp23 = pd.read_csv(arquivo_1, low_memory=False, sep=';', encoding='UTF-8')
+exp24 = pd.read_csv(arquivo_2, low_memory=False, sep=';', encoding='UTF-8')
+exp25 = pd.read_csv(arquivo_3, low_memory=False, sep=';', encoding='UTF-8')
+exp26 = pd.read_csv(arquivo_7, low_memory=False, sep=';', encoding='UTF-8')
+
+imp23 = pd.read_csv(arquivo_4, low_memory=False, sep=';', encoding='UTF-8')
+imp24 = pd.read_csv(arquivo_5, low_memory=False, sep=';', encoding='UTF-8')
+imp25 = pd.read_csv(arquivo_6, low_memory=False, sep=';', encoding='UTF-8')
+imp26 = pd.read_csv(arquivo_8, low_memory=False, sep=';', encoding='UTF-8')
+
+exeufmun = pd.read_csv(uf_mun, low_memory=False, sep=';', encoding='latin1')
+exesh = pd.read_csv(sh, low_memory=False, sep=';', encoding='latin1')
+exepais = pd.read_csv(pais, low_memory=False, sep=';', encoding='latin1')
+
+# --- LIMPANDO AS AUXILIARES ---
+exepais = exepais[['CO_PAIS','NO_PAIS']].drop_duplicates(subset='CO_PAIS')
+exeufmun = exeufmun[['CO_MUN_GEO','NO_MUN_MIN']].drop_duplicates(subset='CO_MUN_GEO')
+exesh = exesh[['CO_SH4','NO_SH4_POR']].drop_duplicates(subset='CO_SH4')
+
+# --- MERGES EXPORTAÇÃO ---
+exp23final = exp23.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left').merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left').merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+exp24final = exp24.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left').merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left').merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+exp25final = exp25.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left').merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left').merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+exp26final = exp26.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left').merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left').merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+# --- MERGES IMPORTAÇÃO ---
+imp23final = imp23.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left').merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left').merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+imp24final = imp24.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left').merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left').merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+imp25final = imp25.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left').merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left').merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+imp26final = imp26.merge(exesh[['CO_SH4','NO_SH4_POR']], left_on='SH4', right_on='CO_SH4', how='left').merge(exeufmun[['CO_MUN_GEO','NO_MUN_MIN']], left_on='CO_MUN', right_on='CO_MUN_GEO', how='left').merge(exepais[['CO_PAIS','NO_PAIS']], left_on='CO_PAIS', right_on='CO_PAIS', how='left')
+
+# --- JUNTANDO TUDO E CRIANDO A DATA ---
+imp_final = pd.concat([imp23final, imp24final, imp25final, imp26final], ignore_index=True)
+exp_final = pd.concat([exp23final, exp24final, exp25final, exp26final], ignore_index=True)
+
+imp_final['DATE'] = pd.to_datetime(imp_final['CO_ANO'].astype(str) + '-' + imp_final['CO_MES'].astype(str).str.zfill(2) + '-01')
+exp_final['DATE'] = pd.to_datetime(exp_final['CO_ANO'].astype(str) + '-' + exp_final['CO_MES'].astype(str).str.zfill(2) + '-01')
+
+# --- FILTRANDO IGUAL SEU PRINT (Jan/2025 a Jan/2026) ---
+mask_imp = (imp_final['DATE'] >= '2025-01-01') & (imp_final['DATE'] <= '2026-01-31')
+df_filtered_imp = imp_final[mask_imp].copy()
+
+mask_exp = (exp_final['DATE'] >= '2025-01-01') & (exp_final['DATE'] <= '2026-01-31')
+df_filtered_exp = exp_final[mask_exp].copy()
+
+# --- AGRUPANDO POR DATA ---
+df_monthly_imports = df_filtered_imp.groupby('DATE')['KG_LIQUIDO'].sum().reset_index()
+df_monthly_exports = df_filtered_exp.groupby('DATE')['KG_LIQUIDO'].sum().reset_index()
+
+# --- PLOTANDO O GRÁFICO DE IMPORTAÇÃO ---
+plt.figure(figsize=(12, 6))
+sns.lineplot(x='DATE', y='KG_LIQUIDO', data=df_monthly_imports, color='red')
+
+plt.title('Total de Importações em KG (Jan/2025 - Jan/2026)')
+plt.xlabel('Mês')
+plt.ylabel('Total de Importações (KG)')
+plt.grid(True)
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# --- PLOTANDO O GRÁFICO DE EXPORTAÇÃO ---
+plt.figure(figsize=(12, 6))
+sns.lineplot(x='DATE', y='KG_LIQUIDO', data=df_monthly_exports, color='blue')
+
+plt.title('Total de Exportações em KG (Jan/2025 - Jan/2026)')
+plt.xlabel('Mês')
+plt.ylabel('Total de Exportações (KG)')
+plt.grid(True)
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
