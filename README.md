@@ -468,3 +468,7 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
 
+<img width="1190" height="590" alt="image" src="https://github.com/user-attachments/assets/8ab52377-5409-4f4a-aab4-87b15da21054" />
+<img width="1189" height="590" alt="image" src="https://github.com/user-attachments/assets/4776b797-97a5-4fde-bbbe-150111be16fd" />
+
+
