@@ -475,8 +475,3 @@ plt.grid(True)
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
-
-<img width="1189" height="590" alt="graficomunicipio" src="https://github.com/user-attachments/assets/97733d92-ee8e-4244-ab09-ae1f301ed844" />
-<img width="1189" height="590" alt="graficogeral" src="https://github.com/user-attachments/assets/9bd33f52-7e0f-4b2f-a019-9145832dfe01" />
-
-
