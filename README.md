@@ -3,6 +3,9 @@
 ## 📌 Sobre o Projeto
 Este repositório contém os scripts desenvolvidos em Python, executados no ambiente Google Colab, para o processo de Extração, Transformação e Carga (ETL) dos dados abertos de comércio exterior brasileiro disponibilizados pelo portal Comex Stat. 
 
+![Grafico Importação e Exportação de municipios](graficomunicipio.png)
+![Grafico Importação e Exportação do Brasil](graficogeral.png)
+
 O objetivo principal desta aplicação é tratar as bases de dados brutas de Importação e Exportação, realizando o cruzamento (*merge*) com tabelas auxiliares para enriquecer as informações numéricas com suas respectivas descrições em texto. Os dados processados são exportados em formato `.csv`, estruturados para consumo em plataformas de visualização de dados e *Business Intelligence* (BI), como o Power BI.
 
 **Nota Acadêmica:** Este projeto é referente a uma atividade desenvolvida para a FATEC. Trata-se da atualização e reaproveitamento de um código estruturado no semestre anterior (que contemplava os anos de 2023, 2024 e 2025), agora expandido e validado para incluir o processamento dos dados consolidados do ano de **2026**.
